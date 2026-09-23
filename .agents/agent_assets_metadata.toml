@@ -1,0 +1,17 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "QOT0XWxiKjmfcb8utikeM"
+uri = "file://.local/conversation-workspace/files/SME-Management-System-updated.zip"
+type = "unspecified"
+title = "Updated SME Management System"
+description = "Updated source archive with per-user role passkeys, server-enforced permissions, corrected role navigation, and the route guard fix."
+logical_id = "9f549b12-7c49-4c7e-8ced-806fd51a4563"
+content_hash = "sha256:669e43dff9dbcff748f786c4c48d2ca5cffe1443e18efa240d7f6ca26faa7874"
+size = 2774398
+mtime_ms = 1790039117701
+storage_uri = "gcs://replit-rams-assets-riker/rams/assets/conversation:4368d87b-23d2-4396-ab28-bc4249afaebb/9f549b12-7c49-4c7e-8ced-806fd51a4563/365a7e4f-573a-447f-b788-222412b99720"
+storage_version_token = "1790039121802509"
+content_type = "application/octet-stream"
+source_uri = "file://SME-Management-System-updated.zip"

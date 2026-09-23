@@ -1,0 +1,501 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Integrated SME Management System API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: dashboard
+    description: Cross-module business overview
+  - name: products
+    description: Inventory and product catalogue operations
+  - name: sales
+    description: Sales and invoice operations
+  - name: expenses
+    description: Expense tracking operations
+  - name: reports
+    description: Financial reporting operations
+  - name: users
+    description: User and role management operations
+  - name: activity
+    description: Activity log operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary
+      responses:
+        "200":
+          description: Current business snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+  /products:
+    get:
+      operationId: getProducts
+      tags: [products]
+      summary: List products
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+        - in: query
+          name: stock
+          schema:
+            type: string
+            enum: [all, low, out]
+            default: all
+      responses:
+        "200":
+          description: Product catalogue
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+    post:
+      operationId: createProduct
+      tags: [products]
+      summary: Create a product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductInput"
+      responses:
+        "201":
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+  /products/{id}:
+    patch:
+      operationId: updateProduct
+      tags: [products]
+      summary: Update a product
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductUpdate"
+      responses:
+        "200":
+          description: Updated product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      operationId: deleteProduct
+      tags: [products]
+      summary: Delete a product
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204":
+          description: Product deleted
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /sales:
+    get:
+      operationId: getSales
+      tags: [sales]
+      summary: List sales
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+        - in: query
+          name: period
+          schema:
+            type: string
+            enum: [today, week, month, all]
+            default: month
+      responses:
+        "200":
+          description: Sales history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Sale"
+    post:
+      operationId: createSale
+      tags: [sales]
+      summary: Record a sale and update inventory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SaleInput"
+      responses:
+        "201":
+          description: Sale recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sale"
+  /expenses:
+    get:
+      operationId: getExpenses
+      tags: [expenses]
+      summary: List expenses
+      parameters:
+        - in: query
+          name: period
+          schema:
+            type: string
+            enum: [today, week, month, all]
+            default: month
+      responses:
+        "200":
+          description: Expense history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Expense"
+    post:
+      operationId: createExpense
+      tags: [expenses]
+      summary: Record an expense
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExpenseInput"
+      responses:
+        "201":
+          description: Expense recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Expense"
+  /reports/financial:
+    get:
+      operationId: getFinancialReport
+      tags: [reports]
+      summary: Get financial report
+      parameters:
+        - in: query
+          name: from
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: to
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Financial report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FinancialReport"
+  /users:
+    get:
+      operationId: getUsers
+      tags: [users]
+      summary: List system users
+      responses:
+        "200":
+          description: User accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SystemUser"
+    post:
+      operationId: createUser
+      tags: [users]
+      summary: Create a user account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserInput"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemUser"
+  /users/{id}:
+    patch:
+      operationId: updateUser
+      tags: [users]
+      summary: Update user role or status
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemUser"
+  /activity:
+    get:
+      operationId: getActivity
+      tags: [activity]
+      summary: List recent activity
+      responses:
+        "200":
+          description: Recent activity feed
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Activity"
+components:
+  parameters:
+    Id:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: integer
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+    Product:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        sku: { type: string }
+        category: { type: string }
+        price: { type: number }
+        cost: { type: number }
+        stock: { type: integer }
+        minStock: { type: integer }
+        unit: { type: string }
+        active: { type: boolean }
+        createdAt: { type: string, format: date-time }
+      required: [id, name, sku, category, price, cost, stock, minStock, unit, active, createdAt]
+    ProductInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        sku: { type: string, minLength: 1 }
+        category: { type: string, minLength: 1 }
+        price: { type: number, minimum: 0 }
+        cost: { type: number, minimum: 0 }
+        stock: { type: integer, minimum: 0 }
+        minStock: { type: integer, minimum: 0 }
+        unit: { type: string, minLength: 1 }
+      required: [name, sku, category, price, cost, stock, minStock, unit]
+    ProductUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        sku: { type: string, minLength: 1 }
+        category: { type: string, minLength: 1 }
+        price: { type: number, minimum: 0 }
+        cost: { type: number, minimum: 0 }
+        stock: { type: integer, minimum: 0 }
+        minStock: { type: integer, minimum: 0 }
+        unit: { type: string, minLength: 1 }
+        active: { type: boolean }
+    SaleItemInput:
+      type: object
+      properties:
+        productId: { type: integer }
+        quantity: { type: integer, minimum: 1 }
+      required: [productId, quantity]
+    SaleItem:
+      type: object
+      properties:
+        productId: { type: integer }
+        name: { type: string }
+        quantity: { type: integer }
+        unitPrice: { type: number }
+        total: { type: number }
+      required: [productId, name, quantity, unitPrice, total]
+    SaleInput:
+      type: object
+      properties:
+        customerName: { type: string }
+        paymentMethod:
+          type: string
+          enum: [cash, transfer, card]
+        items:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/SaleItemInput" }
+      required: [paymentMethod, items]
+    Sale:
+      type: object
+      properties:
+        id: { type: integer }
+        invoiceNumber: { type: string }
+        customerName: { type: string }
+        paymentMethod: { type: string }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/SaleItem" }
+        subtotal: { type: number }
+        total: { type: number }
+        status: { type: string }
+        createdAt: { type: string, format: date-time }
+      required: [id, invoiceNumber, customerName, paymentMethod, items, subtotal, total, status, createdAt]
+    ExpenseInput:
+      type: object
+      properties:
+        category: { type: string, minLength: 1 }
+        description: { type: string, minLength: 1 }
+        amount: { type: number, minimum: 0 }
+        expenseDate: { type: string, format: date }
+      required: [category, description, amount, expenseDate]
+    Expense:
+      type: object
+      properties:
+        id: { type: integer }
+        category: { type: string }
+        description: { type: string }
+        amount: { type: number }
+        expenseDate: { type: string, format: date }
+        createdAt: { type: string, format: date-time }
+      required: [id, category, description, amount, expenseDate, createdAt]
+    DashboardSummary:
+      type: object
+      properties:
+        todayRevenue: { type: number }
+        monthRevenue: { type: number }
+        monthExpenses: { type: number }
+        monthProfit: { type: number }
+        totalProducts: { type: integer }
+        lowStockCount: { type: integer }
+        salesCount: { type: integer }
+        recentSales:
+          type: array
+          items: { $ref: "#/components/schemas/Sale" }
+        lowStockProducts:
+          type: array
+          items: { $ref: "#/components/schemas/Product" }
+      required: [todayRevenue, monthRevenue, monthExpenses, monthProfit, totalProducts, lowStockCount, salesCount, recentSales, lowStockProducts]
+    FinancialReport:
+      type: object
+      properties:
+        from: { type: string, format: date }
+        to: { type: string, format: date }
+        revenue: { type: number }
+        expenses: { type: number }
+        profit: { type: number }
+        salesCount: { type: integer }
+        expenseBreakdown:
+          type: array
+          items:
+            type: object
+            properties:
+              category: { type: string }
+              amount: { type: number }
+            required: [category, amount]
+      required: [from, to, revenue, expenses, profit, salesCount, expenseBreakdown]
+    SystemUser:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        email: { type: string, format: email }
+        role:
+          type: string
+          enum: [administrator, manager, cashier]
+        status:
+          type: string
+          enum: [active, inactive]
+        lastActive: { type: string, format: date-time }
+      required: [id, name, email, role, status, lastActive]
+    UserInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        email: { type: string, format: email }
+        role:
+          type: string
+          enum: [administrator, manager, cashier]
+      required: [name, email, role]
+    UserUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        role:
+          type: string
+          enum: [administrator, manager, cashier]
+        status:
+          type: string
+          enum: [active, inactive]
+    Activity:
+      type: object
+      properties:
+        id: { type: integer }
+        action: { type: string }
+        description: { type: string }
+        actor: { type: string }
+        createdAt: { type: string, format: date-time }
+      required: [id, action, description, actor, createdAt]
+
