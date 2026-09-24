@@ -1,3 +1,4 @@
+// Load environment variables before anything else imports the database module.
 import "./load-env";
 import app from "./app";
 import { logger } from "./lib/logger";
